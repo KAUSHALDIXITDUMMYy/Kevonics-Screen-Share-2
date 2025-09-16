@@ -45,8 +45,18 @@ export const getSubscriberPermissions = async (subscriberId: string): Promise<Su
 
     const activeStreamsMap = new Map()
     streamsSnapshot.docs.forEach((doc) => {
-      const streamData = { id: doc.id, ...doc.data() }
-      activeStreamsMap.set(streamData.publisherId, streamData)
+      const streamData = { id: doc.id, ...doc.data() } as any
+      const existing = activeStreamsMap.get(streamData.publisherId)
+      if (!existing) {
+        activeStreamsMap.set(streamData.publisherId, streamData)
+        return
+      }
+      // Keep the latest by createdAt
+      const existingCreated = new Date(existing.createdAt).getTime()
+      const currentCreated = new Date(streamData.createdAt).getTime()
+      if (currentCreated > existingCreated) {
+        activeStreamsMap.set(streamData.publisherId, streamData)
+      }
     })
 
     console.log("[v0] Active streams found:", activeStreamsMap.size)

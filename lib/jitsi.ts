@@ -51,9 +51,7 @@ export interface JitsiConfig {
 export class JitsiManager {
   private api: any = null
   private domain = "8x8.vc"
-  private magicCookie = "vpaas-magic-cookie-803ebf0cf2d54a5c91f4f55168c2811e"
-  private jwt =
-    "eyJraWQiOiJ2cGFhcy1tYWdpYy1jb29raWUtODAzZWJmMGNmMmQ1NGE1YzkxZjRmNTUxNjhjMjgxMWUiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiJqaXRzaSIsImlzcyI6ImNoYXQiLCJpYXQiOjE3NTc4NzU0MjUsImV4cCI6MTc1Nzg4MjYyNSwibmJmIjoxNzU3ODc1NDIwLCJzdWIiOiJ2cGFhcy1tYWdpYy1jb29raWUtODAzZWJmMGNmMmQ1NGE1YzkxZjRmNTUxNjhjMjgxMWUiLCJjb250ZXh0Ijp7ImZlYXR1cmVzIjp7ImxpdmVzdHJlYW1pbmciOmZhbHNlLCJmaWxlLXVwbG9hZCI6ZmFsc2UsIm91dGJvdW5kLWNhbGwiOmZhbHNlLCJzaXAtb3V0Ym91bmQtY2FsbCI6ZmFsc2UsInRyYW5zY3JpcHRpb24iOmZhbHNlLCJsaXN0LXZpc2l0b3JzIjpmYWxzZSwicmVjb3JkaW5nIjpmYWxzZSwiZmxpcCI6ZmFsc2V9LCJ1c2VyIjp7ImhpZGRlbi1mcm9tLXJlY29yZGVyIjpmYWxzZSwibW9kZXJhdG9yIjp0cnVlLCJuYW1lIjoiVGVzdCBVc2VyIiwiaWQiOiJnb29nbGUtb2F1dGgyfDEwMzY3NjQ0MjA4OTcxNjY3NDYyNCIsImF2YXRhciI6IiIsImVtYWlsIjoidGVzdC51c2VyQGNvbXBhbnkuY29tIn19LCJyb29tIjoiKiJ9.RoJM3erucgdXQ-P8H7MS2MjwHCb9Nx3vMmAD7zI73Ljw6o-UDlVZAIx3cN1ODASWHzNsrUSJQaksvwGDIp2S7XpdSt6wB9m5ea9s-GfdlFDNao4Nm2-F42nhc8qgjEphehzqDHgLqnMdwKeSgXmhcJc-I9Co0C2Sz6coUOMFSMeFSpT7um4VmNMRKlEgjqb6tJrO0pHHp6SJHvWX5RrBOQAMdPVl1FyOSzUUGCwWLbI2krnfvR0i5P8Q1Ls6zBnWisvP_yVZKbVVN1bSbKgHleqFQAVo_kphOJKqTUKEmQ_BFXorQivmmebXlxgC-6YFUGU4mPuR7USL_Oy_OpGxNA"
+  private magicCookie = process.env.NEXT_PUBLIC_JAAS_APP_ID || ""
 
   constructor() {
     this.loadJitsiScript()
@@ -66,8 +64,14 @@ export class JitsiManager {
         return
       }
 
+      const appId = this.magicCookie
+      if (!appId) {
+        reject(new Error("Missing NEXT_PUBLIC_JAAS_APP_ID"))
+        return
+      }
+
       const script = document.createElement("script")
-      script.src = `https://${this.domain}/${this.magicCookie}/external_api.js`
+      script.src = `https://${this.domain}/${appId}/external_api.js`
       script.async = true
       script.onload = () => resolve()
       script.onerror = () => reject(new Error("Failed to load Jitsi Meet API"))
@@ -81,6 +85,28 @@ export class JitsiManager {
 
   async createRoom(config: JitsiConfig): Promise<any> {
     await this.loadJitsiScript()
+
+    // Get a fresh JWT for this room from our server
+    let jwt: string | undefined = undefined
+    try {
+      const res = await fetch("/api/jaas/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roomName: config.roomName,
+          user: {
+            name: config.userInfo?.displayName,
+            email: config.userInfo?.email,
+            moderator: true,
+          },
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || "Failed to fetch token")
+      jwt = data.token
+    } catch (err) {
+      console.error("Failed to fetch JaaS token:", err)
+    }
 
     const defaultConfig = {
       configOverwrite: {
@@ -139,7 +165,7 @@ export class JitsiManager {
         DISABLE_BLUR_SUPPORT: false,
         ...config.interfaceConfigOverwrite,
       },
-      jwt: config.jwt || this.jwt,
+      jwt: config.jwt || jwt,
       ...config,
       roomName: this.generateJaaSRoomName(config.roomName),
     }

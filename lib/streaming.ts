@@ -18,6 +18,23 @@ export interface StreamSession {
 
 export const createStreamSession = async (session: Omit<StreamSession, "id" | "createdAt">) => {
   try {
+    // Ensure only one active stream per publisher by ending any existing active sessions
+    const streamsRef = collection(db, "streamSessions")
+    const activeForPublisherQuery = query(streamsRef, where("publisherId", "==", session.publisherId), where("isActive", "==", true))
+    const activeSnapshot = await getDocs(activeForPublisherQuery)
+    await Promise.all(
+      activeSnapshot.docs.map(async (activeDoc) => {
+        try {
+          await updateDoc(doc(db, "streamSessions", activeDoc.id), {
+            isActive: false,
+            endedAt: new Date(),
+          })
+        } catch {
+          // best-effort; do not block new session creation
+        }
+      }),
+    )
+
     const sessionData = {
       ...session,
       createdAt: new Date(),
