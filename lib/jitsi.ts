@@ -52,6 +52,7 @@ export class JitsiManager {
   private api: any = null
   private domain = "8x8.vc"
   private magicCookie = process.env.NEXT_PUBLIC_JAAS_APP_ID || ""
+  private lastParent: HTMLElement | null = null
 
   constructor() {
     this.loadJitsiScript()
@@ -85,6 +86,16 @@ export class JitsiManager {
 
   async createRoom(config: JitsiConfig): Promise<any> {
     await this.loadJitsiScript()
+
+    // Ensure any previous session is fully disposed before creating a new one
+    if (this.api) {
+      try {
+        this.api.dispose()
+      } catch (e) {
+        // ignore
+      }
+      this.api = null
+    }
 
     // Get a fresh JWT for this room from our server
     let jwt: string | undefined = undefined
@@ -176,6 +187,9 @@ export class JitsiManager {
       hasJWT: !!defaultConfig.jwt,
     })
 
+    // Track the parent node for potential future cleanup (let Jitsi handle DOM removal)
+    this.lastParent = (defaultConfig.parentNode as HTMLElement) || null
+
     this.api = new window.JitsiMeetExternalAPI(this.domain, defaultConfig)
 
     this.api.addEventListener("videoConferenceJoined", () => {
@@ -242,6 +256,7 @@ export class JitsiManager {
       this.api.dispose()
       this.api = null
     }
+    // Avoid manual DOM child removals to prevent React reconciliation conflicts
   }
 
   getApi(): any {

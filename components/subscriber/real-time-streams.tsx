@@ -65,22 +65,20 @@ export function RealTimeStreams() {
     )
   }
 
-  // Show selected stream viewer
-  if (selectedStream) {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <button
-            onClick={handleBackToList}
-            className="flex items-center space-x-2 text-muted-foreground hover:text-foreground"
-          >
-            ← Back to Streams
-          </button>
-        </div>
-        <StreamViewer permission={selectedStream} />
-      </div>
-    )
-  }
+  // Split view: left list, right viewer
+  const rightPane = (
+    <div className="p-0">
+      {selectedStream ? (
+        <StreamViewer key={selectedStream.streamSession?.roomId || selectedStream.id} permission={selectedStream} autoJoin />
+      ) : (
+        <Card>
+          <CardContent className="flex items-center justify-center p-12 text-muted-foreground">
+            Select a stream to start watching
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
 
   return (
     <div className="space-y-6">
@@ -107,10 +105,10 @@ export function RealTimeStreams() {
         </Alert>
       )}
 
-      {/* Available Streams */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Available Streams + Viewer */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {availableStreams.length === 0 ? (
-          <Card className="lg:col-span-2">
+          <Card className="lg:col-span-3">
             <CardContent className="flex items-center justify-center p-12">
               <div className="text-center text-muted-foreground">
                 <Monitor className="h-16 w-16 mx-auto mb-4 opacity-50" />
@@ -123,72 +121,35 @@ export function RealTimeStreams() {
             </CardContent>
           </Card>
         ) : (
-          availableStreams.map((stream) => (
-            <Card key={stream.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="space-y-2">
-                    <CardTitle className="flex items-center space-x-2">
-                      <Badge variant="destructive" className="animate-pulse">
-                        LIVE
-                      </Badge>
-                      <span>{stream.streamSession?.title || "Untitled Stream"}</span>
-                    </CardTitle>
-                    <CardDescription>Publisher: {stream.publisherName}</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                {stream.streamSession?.description && (
-                  <p className="text-sm text-muted-foreground">{stream.streamSession.description}</p>
-                )}
-
-                {(stream.streamSession?.gameName || stream.streamSession?.league || stream.streamSession?.match) && (
-                  <div className="space-y-2">
-                    {stream.streamSession.gameName && (
-                      <div className="flex items-center space-x-2 text-sm">
-                        <Gamepad2 className="h-4 w-4 text-blue-500" />
-                        <span className="font-medium">Game:</span>
-                        <span>{stream.streamSession.gameName}</span>
+          <>
+            <div className="lg:col-span-1 space-y-4">
+              {availableStreams.map((stream) => (
+                <Card
+                  key={stream.id}
+                  className={`transition-shadow cursor-pointer ${
+                    selectedStream?.id === stream.id ? "ring-2 ring-primary" : "hover:shadow-lg"
+                  }`}
+                  onClick={() => handleSelectStream(stream)}
+                >
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-2">
+                        <CardTitle className="flex items-center space-x-2">
+                          <Badge variant="destructive" className="animate-pulse">
+                            LIVE
+                          </Badge>
+                          <span>{stream.streamSession?.title || "Untitled Stream"}</span>
+                        </CardTitle>
+                        <CardDescription>Publisher: {stream.publisherName}</CardDescription>
                       </div>
-                    )}
-                    {stream.streamSession.league && (
-                      <div className="flex items-center space-x-2 text-sm">
-                        <Trophy className="h-4 w-4 text-yellow-500" />
-                        <span className="font-medium">League:</span>
-                        <span>{stream.streamSession.league}</span>
-                      </div>
-                    )}
-                    {stream.streamSession.match && (
-                      <div className="flex items-center space-x-2 text-sm">
-                        <Users className="h-4 w-4 text-green-500" />
-                        <span className="font-medium">Match:</span>
-                        <span>{stream.streamSession.match}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
+                    </div>
+                  </CardHeader>
+                </Card>
+              ))}
+            </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <Badge variant={stream.allowVideo ? "default" : "secondary"}>
-                      Video: {stream.allowVideo ? "✓" : "✗"}
-                    </Badge>
-                    <Badge variant={stream.allowAudio ? "default" : "secondary"}>
-                      Audio: {stream.allowAudio ? "✓" : "✗"}
-                    </Badge>
-                  </div>
-                  <button
-                    onClick={() => handleSelectStream(stream)}
-                    className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-                  >
-                    Watch Stream
-                  </button>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+            <div className="lg:col-span-2">{rightPane}</div>
+          </>
         )}
       </div>
     </div>

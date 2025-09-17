@@ -56,7 +56,6 @@ export function AvailableStreams() {
   }
 
   const handleJoinStream = (permission: SubscriberPermission) => {
-    // Stream joined successfully
     console.log("Joined stream:", permission.streamSession?.title)
   }
 
