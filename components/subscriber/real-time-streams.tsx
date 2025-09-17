@@ -26,6 +26,12 @@ export function RealTimeStreams() {
         const streams = await getAvailableStreams(user.uid)
         console.log("[v0] Available streams loaded:", streams.length)
         setAvailableStreams(streams)
+        // Keep selected stream in sync with latest data or clear if gone
+        setSelectedStream((current) => {
+          if (!current) return current
+          const updated = streams.find((s) => s.id === current.id) || null
+          return updated
+        })
         setError("")
       } catch (err: any) {
         console.error("[v0] Error loading streams:", err)
@@ -45,7 +51,12 @@ export function RealTimeStreams() {
 
   const handleSelectStream = (stream: SubscriberPermission) => {
     console.log("[v0] Selecting stream:", stream.id)
-    setSelectedStream(stream)
+    // Toggle selection: clicking the same stream collapses the viewer
+    if (selectedStream?.id === stream.id) {
+      setSelectedStream(null)
+    } else {
+      setSelectedStream(stream)
+    }
   }
 
   const handleBackToList = () => {
@@ -69,7 +80,11 @@ export function RealTimeStreams() {
   const rightPane = (
     <div className="p-0">
       {selectedStream ? (
-        <StreamViewer key={selectedStream.streamSession?.roomId || selectedStream.id} permission={selectedStream} autoJoin />
+        <StreamViewer
+          key={selectedStream.streamSession?.roomId || selectedStream.id}
+          permission={selectedStream}
+          onLeaveStream={() => setSelectedStream(null)}
+        />
       ) : (
         <Card>
           <CardContent className="flex items-center justify-center p-12 text-muted-foreground">
