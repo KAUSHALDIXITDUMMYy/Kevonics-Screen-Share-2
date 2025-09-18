@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { useRouter } from "next/navigation"
 import { Settings, Users, Shield, LogOut, Activity } from "lucide-react"
 import { SubscriberAssignments } from "@/components/admin/subscriber-assignments"
+import { ZoomAssignmentsAdmin } from "@/components/admin/zoom-assignments"
 
 export default function AdminDashboard() {
   const { userProfile } = useAuth()
@@ -48,7 +49,7 @@ export default function AdminDashboard() {
         {/* Main Content */}
         <main className="container mx-auto px-4 py-8">
           <Tabs defaultValue="users" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="users" className="flex items-center space-x-2">
                 <Users className="h-4 w-4" />
                 <span>User Management</span>
@@ -64,6 +65,9 @@ export default function AdminDashboard() {
               <TabsTrigger value="assignments" className="flex items-center space-x-2">
                 <Shield className="h-4 w-4" />
                 <span>Assignments</span>
+              </TabsTrigger>
+              <TabsTrigger value="zoom-calls" className="flex items-center space-x-2">
+                <span>Zoom Assignments</span>
               </TabsTrigger>
             </TabsList>
 
@@ -81,6 +85,9 @@ export default function AdminDashboard() {
 
             <TabsContent value="assignments">
               <SubscriberAssignments />
+            </TabsContent>
+            <TabsContent value="zoom-calls">
+              <ZoomAssignmentsAdmin />
             </TabsContent>
           </Tabs>
         </main>

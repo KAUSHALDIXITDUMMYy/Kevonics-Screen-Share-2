@@ -15,6 +15,8 @@ export interface UserProfile {
   email: string
   role: UserRole
   displayName?: string
+  zoomUserId?: string
+  zoomUserEmail?: string
   createdAt: Date
   isActive: boolean
 }

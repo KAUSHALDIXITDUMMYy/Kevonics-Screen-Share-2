@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Switch } from "@/components/ui/switch"
-import { createUser, getAllUsers, updateUserStatus, type UserRole } from "@/lib/admin"
+import { createUser, getAllUsers, updateUserStatus, updatePublisherZoomMapping, type UserRole } from "@/lib/admin"
 import type { UserProfile } from "@/lib/auth"
 import { Plus, Users, UserCheck, UserX } from "lucide-react"
 
@@ -259,6 +259,7 @@ export function UserManagement() {
                 <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Created</TableHead>
+                <TableHead>Zoom User</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -283,6 +284,30 @@ export function UserManagement() {
                     </div>
                   </TableCell>
                   <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    {user.role === "publisher" ? (
+                      <div className="flex flex-col gap-2 min-w-[260px]">
+                        <Input
+                          placeholder="Zoom user ID"
+                          defaultValue={(user as any).zoomUserId || ""}
+                          onBlur={async (e) => {
+                            const value = e.currentTarget.value.trim()
+                            await updatePublisherZoomMapping(user.id, { zoomUserId: value || undefined })
+                          }}
+                        />
+                        <Input
+                          placeholder="Zoom user email"
+                          defaultValue={(user as any).zoomUserEmail || ""}
+                          onBlur={async (e) => {
+                            const value = e.currentTarget.value.trim()
+                            await updatePublisherZoomMapping(user.id, { zoomUserEmail: value || undefined })
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <Switch
                       checked={user.isActive}
