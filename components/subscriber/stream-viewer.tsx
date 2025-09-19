@@ -19,8 +19,8 @@ export function StreamViewer({ permission, onJoinStream, onLeaveStream }: Stream
   const [isConnected, setIsConnected] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const [audioEnabled, setAudioEnabled] = useState(permission.allowAudio)
-  const [videoEnabled, setVideoEnabled] = useState(permission.allowVideo)
+  const [audioEnabled, setAudioEnabled] = useState(false)
+  const [videoEnabled, setVideoEnabled] = useState(false)
   const jitsiContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export function StreamViewer({ permission, onJoinStream, onLeaveStream }: Stream
         height: 500,
         parentNode: jitsiContainerRef.current,
         configOverwrite: {
-          startWithAudioMuted: !permission.allowAudio,
+          startWithAudioMuted: true,
           startWithVideoMuted: true, // Subscribers don't broadcast video
           enableWelcomePage: false,
           prejoinPageEnabled: false,
@@ -53,9 +53,7 @@ export function StreamViewer({ permission, onJoinStream, onLeaveStream }: Stream
           startScreenSharing: false,
         },
         interfaceConfigOverwrite: {
-          TOOLBAR_BUTTONS: permission.allowAudio
-            ? ["microphone", "hangup", "settings", "fullscreen"]
-            : ["hangup", "settings", "fullscreen"],
+          TOOLBAR_BUTTONS: ["hangup", "settings", "fullscreen"],
           SHOW_JITSI_WATERMARK: false,
           SHOW_POWERED_BY: false,
           APP_NAME: "Kevonics Screen Share",
@@ -71,17 +69,9 @@ export function StreamViewer({ permission, onJoinStream, onLeaveStream }: Stream
         setLoading(false)
         onJoinStream?.(permission)
 
-        // Disable video for subscriber (they're just viewing)
-        setTimeout(() => {
-          api.executeCommand("toggleVideo")
-        }, 1000)
-
-        // Apply audio permissions
-        if (!permission.allowAudio) {
-          setTimeout(() => {
-            api.executeCommand("toggleAudio")
-          }, 1000)
-        }
+        // Ensure mic/camera remain off
+        setAudioEnabled(false)
+        setVideoEnabled(false)
       })
 
       api.addEventListener("videoConferenceLeft", () => {
@@ -89,7 +79,11 @@ export function StreamViewer({ permission, onJoinStream, onLeaveStream }: Stream
       })
 
       api.addEventListener("audioMuteStatusChanged", (event: any) => {
-        setAudioEnabled(!event.muted && permission.allowAudio)
+        // Keep audio off for subscribers regardless of permission flag
+        setAudioEnabled(false)
+        if (!event.muted) {
+          api.executeCommand("toggleAudio")
+        }
       })
     } catch (err: any) {
       setError(err.message || "Failed to join stream")
