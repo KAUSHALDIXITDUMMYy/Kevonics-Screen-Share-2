@@ -82,7 +82,7 @@ export default function PublisherDashboard() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="stream">
+            <TabsContent value="stream" forceMount>
               <StreamControls onStreamStart={handleStreamStart} onStreamEnd={handleStreamEnd} />
             </TabsContent>
 
