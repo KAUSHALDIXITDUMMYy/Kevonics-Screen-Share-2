@@ -128,11 +128,11 @@ export class JitsiManager {
         disableModeratorIndicator: true,
         startScreenSharing: false,
         enableEmailInStats: false,
-        // Try to lock camera framerate at 60fps
+        // Target 720p at high framerate to prioritize smoothness
         constraints: {
           video: {
-            width: { ideal: 1920, max: 1920 },
-            height: { ideal: 1080, max: 1080 },
+            width: { ideal: 1280, max: 1280 },
+            height: { ideal: 720, max: 720 },
             frameRate: { ideal: 60, max: 60 },
           },
         },
@@ -140,8 +140,8 @@ export class JitsiManager {
         desktopSharingFrameRate: { min: 60, max: 60 },
         // Avoid Jitsi suspending video which can cause choppiness
         disableSuspendVideo: true,
-        // Aim for 1080p sending resolution
-        resolution: 1080,
+        // Aim for 720p sending resolution
+        resolution: 720,
         // Prefer a codec that's efficient at high frame rates
         videoQuality: {
           preferredCodec: "VP9",
