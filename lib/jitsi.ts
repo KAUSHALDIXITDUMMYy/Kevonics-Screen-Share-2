@@ -128,6 +128,32 @@ export class JitsiManager {
         disableModeratorIndicator: true,
         startScreenSharing: false,
         enableEmailInStats: false,
+        // Try to lock camera framerate at 60fps
+        constraints: {
+          video: {
+            width: { ideal: 1920, max: 1920 },
+            height: { ideal: 1080, max: 1080 },
+            frameRate: { ideal: 60, max: 60 },
+          },
+        },
+        // Try to lock desktop sharing framerate at 60fps
+        desktopSharingFrameRate: { min: 60, max: 60 },
+        // Avoid Jitsi suspending video which can cause choppiness
+        disableSuspendVideo: true,
+        // Aim for 1080p sending resolution
+        resolution: 1080,
+        // Prefer a codec that's efficient at high frame rates
+        videoQuality: {
+          preferredCodec: "VP9",
+          maxBitratesVideo: {
+            low: 250000,
+            standard: 800000,
+            high: 3500000,
+          },
+        },
+        // Keep multiple layers and suspend when not in view
+        disableSimulcast: false,
+        enableLayerSuspension: true,
         ...config.configOverwrite,
       },
       interfaceConfigOverwrite: {
