@@ -144,20 +144,24 @@ export class JitsiManager {
         },
         // Try to lock desktop sharing framerate at 60fps
         desktopSharingFrameRate: { min: 60, max: 60 },
+          // Keep simulcast for camera, but disable it for screenshare to stabilize 60fps
+          disableSimulcastForScreenSharing: true,
         // Avoid Jitsi suspending video which can cause choppiness
         disableSuspendVideo: true,
         // Aim for 720p sending resolution
         resolution: 720,
         // Prefer a widely compatible codec to reduce CPU on many clients
         videoQuality: {
-          preferredCodec: "VP8",
+          preferredCodec: "H264",
           maxFullResolutionParticipants: 1,
           maxBitratesVideo: {
             low: 250000,
             standard: 1200000,
-            high: 6000000,
+              high: 10000000,
           },
         },
+          // Ensure H264 is allowed for hardware acceleration
+          disableH264: false,
         // Keep multiple layers; avoid layer suspension to reduce quality oscillations
         disableSimulcast: false,
         enableLayerSuspension: false,

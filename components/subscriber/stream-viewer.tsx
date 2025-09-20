@@ -57,7 +57,7 @@ export function StreamViewer({ permission, onJoinStream, onLeaveStream }: Stream
             disableAudioLevels: true,
             // Prefer VP8 on subscribers for lighter decode; keep full-res to one participant
             videoQuality: {
-              preferredCodec: "VP8",
+              preferredCodec: "H264",
               maxFullResolutionParticipants: 1,
             },
         },
