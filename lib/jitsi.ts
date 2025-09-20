@@ -53,7 +53,7 @@ export interface JitsiConfig {
 export class JitsiManager {
   private api: any = null
   private domain = "8x8.vc"
-  private magicCookie = process.env.NEXT_PUBLIC_JAAS_APP_ID || "vpaas-magic-cookie-3c21a1fc69704478860d6fde13ead909"
+  private magicCookie = process.env.NEXT_PUBLIC_JAAS_APP_ID 
   private lastParent: HTMLElement | null = null
 
   constructor() {
