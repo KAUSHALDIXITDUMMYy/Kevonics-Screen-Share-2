@@ -17,12 +17,11 @@ type TokenRequestBody = {
     moderator?: boolean
   }
 }
-
 export async function POST(req: NextRequest) {
   try {
     const appId = process.env.NEXT_PUBLIC_JAAS_APP_ID || "vpaas-magic-cookie-3c21a1fc69704478860d6fde13ead909"
-    const apiKey = process.env.JAAS_API_KEY ||"vpaas-magic-cookie-3c21a1fc69704478860d6fde13ead909/89576c"
-    const privateKeyPem = process.env.JAAS_PRIVATE_KEY || "-----BEGIN PRIVATE KEY-----
+    const apiKey = process.env.JAAS_API_KEY || "vpaas-magic-cookie-3c21a1fc69704478860d6fde13ead909/89576c"
+    const privateKeyPem = process.env.JAAS_PRIVATE_KEY || `-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC66wwCjl8MkXE1
 5P3TNhHTqWxNZS66H+fuMtKhYZCbWRp6hvUFKPNJnxDRE8ohLMWPHI92s/Q+dNKw
 /taCa1bHhHck2kNnPBhoMAe2Wgu/wARmjGsA3o5ighwt3DvzhjbqIJH0Gg2iKiNO
@@ -49,7 +48,7 @@ SbDQzZfHMWU01BOb+u87MDily2HIEE7d/McgS5kfAoGAHUWPjnB3UynfUwgmGl28
 XfhfkVSUyWQqFeDUH9256xlhMwhPDobv3YX2SD3iYHqbCUX/qRvGyoe5ZDa2Ch3c
 EAvlEeWwFt7ALW34LKLmJUx15q2chnz0zPT+4i4YozGhup0wnt2WRW4/dbWrZQTi
 REA31ENwj9XLMkGR0XwwVKw=
------END PRIVATE KEY-----"
+-----END PRIVATE KEY-----`
 
 
     if (!appId || !apiKey || !privateKeyPem) {
