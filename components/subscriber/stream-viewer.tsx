@@ -51,12 +51,24 @@ export function StreamViewer({ permission, onJoinStream, onLeaveStream }: Stream
           prejoinPageEnabled: false,
           disableModeratorIndicator: true,
           startScreenSharing: false,
+            // Receive only the most relevant video stream to avoid choppiness as participants grow
+            channelLastN: 1,
+            // Reduce client overhead on subscribers
+            disableAudioLevels: true,
+            // Prefer VP8 on subscribers for lighter decode; keep full-res to one participant
+            videoQuality: {
+              preferredCodec: "VP8",
+              maxFullResolutionParticipants: 1,
+            },
         },
         interfaceConfigOverwrite: {
           TOOLBAR_BUTTONS: ["hangup", "settings", "fullscreen"],
           SHOW_JITSI_WATERMARK: false,
           SHOW_POWERED_BY: false,
           APP_NAME: "Kevonics Screen Share",
+            // Keep focus on the stage view and newest screenshare
+            AUTO_PIN_LATEST_SCREEN_SHARE: true,
+            filmstrip: { disabled: true },
         },
         userInfo: {
           displayName: `Subscriber`,

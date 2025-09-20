@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 import { SignJWT, importPKCS8 } from "jose"
 
+// Run this route on the Edge to minimize latency when generating JaaS tokens
+export const runtime = "edge"
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+// Prefer US-East by default; adjust to where most users are (e.g., "fra1", "lhr1", "sin1")
+export const preferredRegion = ["iad1"]
+
 type TokenRequestBody = {
   roomName: string
   user?: {

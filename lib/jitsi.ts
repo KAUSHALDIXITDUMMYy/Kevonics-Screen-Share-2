@@ -17,6 +17,7 @@ export interface JitsiConfig {
     disableModeratorIndicator?: boolean
     startScreenSharing?: boolean
     enableEmailInStats?: boolean
+    [key: string]: any
   }
   interfaceConfigOverwrite?: {
     TOOLBAR_BUTTONS?: string[]
@@ -40,6 +41,7 @@ export interface JitsiConfig {
     AUTO_PIN_LATEST_SCREEN_SHARE?: boolean
     DISABLE_VIDEO_BACKGROUND?: boolean
     DISABLE_BLUR_SUPPORT?: boolean
+    [key: string]: any
   }
   userInfo?: {
     displayName?: string
@@ -128,6 +130,10 @@ export class JitsiManager {
         disableModeratorIndicator: true,
         startScreenSharing: false,
         enableEmailInStats: false,
+        // Avoid P2P for stability and consistent SFU behavior during screen share
+        p2p: { enabled: false },
+        // Reduce client overhead to help maintain frame rate
+        disableAudioLevels: true,
         // Target 720p at high framerate to prioritize smoothness
         constraints: {
           video: {
@@ -142,13 +148,14 @@ export class JitsiManager {
         disableSuspendVideo: true,
         // Aim for 720p sending resolution
         resolution: 720,
-        // Prefer a codec that's efficient at high frame rates
+        // Prefer a widely compatible codec to reduce CPU on many clients
         videoQuality: {
-          preferredCodec: "VP9",
+          preferredCodec: "VP8",
+          maxFullResolutionParticipants: 1,
           maxBitratesVideo: {
             low: 250000,
-            standard: 800000,
-            high: 3500000,
+            standard: 1200000,
+            high: 6000000,
           },
         },
         // Keep multiple layers and suspend when not in view
