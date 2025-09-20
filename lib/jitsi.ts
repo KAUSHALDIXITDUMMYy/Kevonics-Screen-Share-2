@@ -158,9 +158,9 @@ export class JitsiManager {
             high: 6000000,
           },
         },
-        // Keep multiple layers and suspend when not in view
+        // Keep multiple layers; avoid layer suspension to reduce quality oscillations
         disableSimulcast: false,
-        enableLayerSuspension: true,
+        enableLayerSuspension: false,
         ...config.configOverwrite,
       },
       interfaceConfigOverwrite: {

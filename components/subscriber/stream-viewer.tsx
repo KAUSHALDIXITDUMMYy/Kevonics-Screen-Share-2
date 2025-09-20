@@ -75,7 +75,7 @@ export function StreamViewer({ permission, onJoinStream, onLeaveStream }: Stream
         },
       })
 
-      // Set up event listeners
+        // Set up event listeners
       api.addEventListener("videoConferenceJoined", () => {
         setIsConnected(true)
         setLoading(false)
@@ -84,6 +84,11 @@ export function StreamViewer({ permission, onJoinStream, onLeaveStream }: Stream
         // Ensure mic/camera remain off
         setAudioEnabled(false)
         setVideoEnabled(false)
+
+          // Request highest quality for the single subscribed stream
+          try {
+            api.executeCommand("setVideoQuality", "ultra")
+          } catch {}
       })
 
       api.addEventListener("videoConferenceLeft", () => {
